@@ -1,0 +1,29 @@
+{
+  "name": "breadbot2",
+  "version": "1.0.0",
+  "description": "A Discord bot with slash commands and rank system",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "register": "node deploy-commands.js",
+    "delete-commands": "node delete-commands.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "slash-commands",
+    "rank"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.21.0",
+    "dotenv": "^16.6.1",
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
