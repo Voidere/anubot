@@ -1,6 +1,6 @@
-# BreadBot2
+# Anubot
 
-A Discord bot built with Node.js and discord.js, featuring slash commands, XP/rank system, and moderation utilities.
+My own private discord bot built with discord.js, featuring slash commands, XP/rank system, and moderation utilities.
 
 ## Features
 - Slash commands: `/ping`, `/mute`, `/rank`, `/ban`, `/dice`
