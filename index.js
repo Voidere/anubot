@@ -66,6 +66,13 @@ client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return;
   const command = client.commands.get(interaction.commandName);
   if (!command) return;
+  // Restrict commands to COMMANDS_CHANNEL_ID unless admin
+  if (
+    interaction.channel.id !== COMMANDS_CHANNEL_ID &&
+    !(ADMIN_ROLE_ID && interaction.member && interaction.member.roles.cache.has(ADMIN_ROLE_ID))
+  ) {
+    return interaction.reply({ content: `You can only use commands in the designated channel.`, ephemeral: true });
+  }
   try {
     await command.execute(interaction, XP);
   } catch (error) {
@@ -77,6 +84,11 @@ client.on(Events.InteractionCreate, async interaction => {
     }
   }
 });
+
+const LEVELUP_CHANNEL_ID = process.env.LEVELUP_CHANNEL_ID;
+const COMMANDS_CHANNEL_ID = process.env.COMMANDS_CHANNEL_ID;
+const RULES_CHANNEL_ID = process.env.RULES_CHANNEL_ID;
+const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID;
 
 client.on(Events.MessageCreate, async message => {
   if (message.author.bot) return;
@@ -92,11 +104,40 @@ client.on(Events.MessageCreate, async message => {
     const newXP = userXP.xp;
     const newLevel = Math.floor(0.1 * Math.sqrt(newXP));
     if (newLevel > oldLevel) {
-      await message.channel.send(`🎉 Congratulations <@${message.author.id}>, you leveled up to level ${newLevel}!`);
+      // Send level-up message to the configured channel
+      const levelupChannel = message.guild.channels.cache.get(LEVELUP_CHANNEL_ID);
+      if (levelupChannel) {
+        await levelupChannel.send(`🎉 Congratulations <@${message.author.id}>, you leveled up to level ${newLevel}!`);
+      } else {
+        await message.channel.send(`🎉 Congratulations <@${message.author.id}>, you leveled up to level ${newLevel}!`);
+      }
     }
   } catch (err) {
     console.error('XP DB error:', err);
   }
+});
+
+// Welcome messages
+const welcomeMessages = [
+  `yo <@USERID>, welcome 😎\nrules are somewhere 👉 <#rules-channel-id>\njust hang out and have fun lol`,
+  `oh look, <@USERID> showed up 🎉\nidk, check the rules maybe 👉 <#rules-channel-id>\nor don’t, whatever`,
+  `hey <@USERID>! 👋\nwelcome / willkommen / üdv 😎\nrules → <#rules-channel-id>\nhave fun or don’t lol`,
+  `🚪 door creaks open\noh hey <@USERID>, you’re here now\nread the rules 👉 <#rules-channel-id>\nthen go be chaotic (but like, nicely) 😇`,
+  `welcome <@USERID> 🎉\nrules → <#rules-channel-id>\ndone. ez.`,
+  `hey <@USERID> 😎\nwillkommen / üdv itt\nrules sind hier 👉 <#rules-channel-id>\ndon’t be sus pls`,
+  `<@USERID> has entered the chat 🚀\nrules 👉 <#rules-channel-id>\ngood luck soldier 🫡`
+];
+
+client.on(Events.GuildMemberAdd, async member => {
+  // Find a general or system channel to send the welcome, or fallback to the first text channel
+  let channel = member.guild.systemChannel || member.guild.channels.cache.find(c => c.type === 0 && c.permissionsFor(member.guild.members.me).has('SendMessages'));
+  if (!channel) return;
+  // Pick a random welcome message
+  const msgTemplate = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+  const msg = msgTemplate
+    .replace(/<@USERID>/g, `<@${member.id}>`)
+    .replace(/<#rules-channel-id>/g, `<#${RULES_CHANNEL_ID}>`);
+  channel.send({ content: msg });
 });
 
 client.login(process.env.DISCORD_TOKEN);
