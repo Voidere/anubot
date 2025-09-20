@@ -1,6 +1,5 @@
 import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID;
-const COMMANDS_CHANNEL_ID = process.env.COMMANDS_CHANNEL_ID;
 
 function hasRoleOrHigher(member, roleId) {
   const targetRole = member.guild.roles.cache.get(roleId);
@@ -14,12 +13,8 @@ export default {
     .setDescription('Make the bot say something')
     .addStringOption(option => option.setName('text').setDescription('Text to say').setRequired(true)),
   async execute(interaction) {
-    // Restrict to commands channel unless admin
-    if (
-      interaction.channel.id !== COMMANDS_CHANNEL_ID &&
-      !(ADMIN_ROLE_ID && hasRoleOrHigher(interaction.member, ADMIN_ROLE_ID))
-    ) {
-      return interaction.reply({ content: `You can only use this command in the designated channel.`, flags: MessageFlags.Ephemeral });
+    if (!ADMIN_ROLE_ID || !hasRoleOrHigher(interaction.member, ADMIN_ROLE_ID)) {
+      return interaction.reply({ content: 'Only admins can use this command.', flags: MessageFlags.Ephemeral });
     }
     const text = interaction.options.getString('text');
     await interaction.reply({ content: '✅', ephemeral: true });

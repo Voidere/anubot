@@ -42,7 +42,9 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.GuildMembers
   ]
 });
 client.commands = new Collection();
@@ -104,13 +106,7 @@ client.on(Events.MessageCreate, async message => {
     const newXP = userXP.xp;
     const newLevel = Math.floor(0.1 * Math.sqrt(newXP));
     if (newLevel > oldLevel) {
-      // Send level-up message to the configured channel
-      const levelupChannel = message.guild.channels.cache.get(LEVELUP_CHANNEL_ID);
-      if (levelupChannel) {
-        await levelupChannel.send(`🎉 Congratulations <@${message.author.id}>, you leveled up to level ${newLevel}!`);
-      } else {
-        await message.channel.send(`🎉 Congratulations <@${message.author.id}>, you leveled up to level ${newLevel}!`);
-      }
+      await message.channel.send(`🎉 Congratulations <@${message.author.id}>, you leveled up to level ${newLevel}!`);
     }
   } catch (err) {
     console.error('XP DB error:', err);
@@ -138,6 +134,45 @@ client.on(Events.GuildMemberAdd, async member => {
     .replace(/<@USERID>/g, `<@${member.id}>`)
     .replace(/<#rules-channel-id>/g, `<#${RULES_CHANNEL_ID}>`);
   channel.send({ content: msg });
+});
+
+// Role claim emoji/role mapping
+const ROLE_EMOJI_MAP = {
+  'faceit:1419084458845274232': process.env.FACEIT_ROLE_ID,
+  'cs2:1419084499798458460': process.env.CS2_ROLE_ID,
+  'gtao:1419085112783405076': process.env.GTA_ROLE_ID,
+  'amongus:1419083428644524093': process.env.AMONGUS_ROLE_ID,
+  'minecraft:1419084558648742078': process.env.MINECRAFT_ROLE_ID,
+  '🎥': process.env.MOVIENIGHT_ROLE_ID,
+  'development:1419085209776685067': process.env.DEVELOPMENT_ROLE_ID,
+};
+
+client.on('messageReactionAdd', async (reaction, user) => {
+  if (user.bot) return;
+  if (reaction.partial) try { await reaction.fetch(); } catch { return; }
+  if (reaction.message.partial) try { await reaction.message.fetch(); } catch { return; }
+  if (!reaction.message.author?.bot) return;
+  const emojiKey = reaction.emoji.id ? `${reaction.emoji.name}:${reaction.emoji.id}` : reaction.emoji.name;
+  const roleId = ROLE_EMOJI_MAP[emojiKey];
+  if (!roleId) return;
+  const member = await reaction.message.guild.members.fetch(user.id);
+  if (!member.roles.cache.has(roleId)) {
+    await member.roles.add(roleId).catch(() => {});
+  }
+});
+
+client.on('messageReactionRemove', async (reaction, user) => {
+  if (user.bot) return;
+  if (reaction.partial) try { await reaction.fetch(); } catch { return; }
+  if (reaction.message.partial) try { await reaction.message.fetch(); } catch { return; }
+  if (!reaction.message.author?.bot) return;
+  const emojiKey = reaction.emoji.id ? `${reaction.emoji.name}:${reaction.emoji.id}` : reaction.emoji.name;
+  const roleId = ROLE_EMOJI_MAP[emojiKey];
+  if (!roleId) return;
+  const member = await reaction.message.guild.members.fetch(user.id);
+  if (member.roles.cache.has(roleId)) {
+    await member.roles.remove(roleId).catch(() => {});
+  }
 });
 
 client.login(process.env.DISCORD_TOKEN);

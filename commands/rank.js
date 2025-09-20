@@ -11,11 +11,13 @@ function getLevel(xp) {
 export default {
   data: new SlashCommandBuilder()
     .setName('rank')
-    .setDescription('Show your XP and rank'),
+    .setDescription('Show your XP and rank')
+    .addUserOption(option => option.setName('user').setDescription('User to check (optional)').setRequired(false)),
   async execute(interaction, XP) {
     await interaction.deferReply();
-    const userId = interaction.user.id;
-    const username = interaction.user.username;
+    const targetUser = interaction.options.getUser('user') || interaction.user;
+    const userId = targetUser.id;
+    const username = targetUser.username;
     try {
       const userXP = await XP.findByPk(userId);
       const xp = userXP ? userXP.xp : 0;
@@ -31,7 +33,7 @@ export default {
       const embed = new EmbedBuilder()
         .setColor(0x00ff00)
         .setTitle(`🏆 ${username}'s Rank`)
-        .setThumbnail(interaction.user.displayAvatarURL())
+        .setThumbnail(targetUser.displayAvatarURL())
         .addFields(
           { name: 'Level', value: `**${level}**`, inline: true },
           { name: 'Total XP', value: `**${xp}**`, inline: true },

@@ -21,6 +21,13 @@ My own private discord bot built with discord.js, featuring slash commands, XP/r
    LEVELUP_CHANNEL_ID=your-levelup-channel-id-here
    COMMANDS_CHANNEL_ID=your-commands-channel-id-here
    RULES_CHANNEL_ID=your-rules-channel-id-here
+   FACEIT_ROLE_ID=your-faceit-role-id-here
+   CS2_ROLE_ID=your-cs2-role-id-here
+   GTA_ROLE_ID=your-gta-role-id-here
+   AMONGUS_ROLE_ID=your-amongus-role-id-here
+   MINECRAFT_ROLE_ID=your-minecraft-role-id-here
+   MOVIENIGHT_ROLE_ID=your-movienight-role-id-here
+   DEVELOPMENT_ROLE_ID=your-development-role-id-here
    ```
 3. Register slash commands with Discord:
    ```bash
