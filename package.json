@@ -1,5 +1,5 @@
 {
-  "name": "breadbot2",
+  "name": "anubot",
   "version": "1.0.0",
   "description": "A Discord bot with slash commands and rank system",
   "type": "module",
@@ -15,7 +15,7 @@
     "slash-commands",
     "rank"
   ],
-  "author": "Your Name",
+  "author": "voidere",
   "license": "MIT",
   "dependencies": {
     "discord.js": "^14.21.0",
