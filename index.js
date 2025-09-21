@@ -1,6 +1,6 @@
 import express from "express";
 import "dotenv/config";
-import { Client, Collection, GatewayIntentBits, Events } from "discord.js";
+import { Client, Collection, GatewayIntentBits, Events, ActivityType } from "discord.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -76,6 +76,11 @@ for (const file of commandFiles) {
 
 client.once(Events.ClientReady, () => {
   console.log(`Logged in as ${client.user.tag}`);
+  client.user.setPresence({
+    activities: [{ name: 'Nekonia', type: ActivityType.Playing }],
+    status: 'online',
+  });
+  console.log('Set presence: Playing Nekonia');
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
@@ -222,7 +227,7 @@ const ROLE_EMOJI_MAP = {
   "gtao:1419085112783405076": process.env.GTA_ROLE_ID,
   "amongus:1419083428644524093": process.env.AMONGUS_ROLE_ID,
   "minecraft:1419084558648742078": process.env.MINECRAFT_ROLE_ID,
-  "🎥": process.env.MOVIENIGHT_ROLE_ID,
+  "🎬": process.env.MOVIENIGHT_ROLE_ID,
   "development:1419085209776685067": process.env.DEVELOPMENT_ROLE_ID,
 };
 
@@ -240,7 +245,8 @@ client.on("messageReactionAdd", async (reaction, user) => {
     } catch {
       return;
     }
-  if (!reaction.message.author?.bot) return;
+  // Only process reactions for /roles messages with marker
+  if (!reaction.message.content.includes('[role-message]')) return;
   const emojiKey = reaction.emoji.id
     ? `${reaction.emoji.name}:${reaction.emoji.id}`
     : reaction.emoji.name;
@@ -266,7 +272,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
     } catch {
       return;
     }
-  if (!reaction.message.author?.bot) return;
+  if (!reaction.message.content.includes('[role-message]')) return;
   const emojiKey = reaction.emoji.id
     ? `${reaction.emoji.name}:${reaction.emoji.id}`
     : reaction.emoji.name;

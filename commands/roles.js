@@ -31,6 +31,7 @@ export default {
       description += `${emoji}   —   **${label}**\n\n`;
     }
     description += '\n if you change ur mind u can remove the role by reacting with the same emoji again';
+    description += '\n\n[role-message]';
     const msg = await interaction.channel.send({ content: description });
     for (const { react } of ROLE_CONFIG) {
       try {
