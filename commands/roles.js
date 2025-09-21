@@ -7,7 +7,7 @@ const ROLE_CONFIG = [
   { emoji: '<:gtao:1419085112783405076>', react: 'gtao:1419085112783405076', roleId: process.env.GTA_ROLE_ID, label: 'GTA' },
   { emoji: '<:amongus:1419083428644524093>', react: 'amongus:1419083428644524093', roleId: process.env.AMONGUS_ROLE_ID, label: 'Among Us' },
   { emoji: '<:minecraft:1419084558648742078>', react: 'minecraft:1419084558648742078', roleId: process.env.MINECRAFT_ROLE_ID, label: 'Minecraft' },
-  { emoji: '🎥', react: '🎥', roleId: process.env.MOVIENIGHT_ROLE_ID, label: 'Movie night' },
+  { emoji: '🎬', react: '🎬', roleId: process.env.MOVIENIGHT_ROLE_ID, label: 'Movie night' },
   { emoji: '<:development:1419085209776685067>', react: 'development:1419085209776685067', roleId: process.env.DEVELOPMENT_ROLE_ID, label: 'Development' },
 ];
 

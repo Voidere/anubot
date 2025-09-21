@@ -118,8 +118,49 @@ const LEVELUP_CHANNEL_ID = process.env.LEVELUP_CHANNEL_ID;
 const COMMANDS_CHANNEL_ID = process.env.COMMANDS_CHANNEL_ID;
 const RULES_CHANNEL_ID = process.env.RULES_CHANNEL_ID;
 const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID;
+const COUNTING_CHANNEL_ID = process.env.COUNTING_CHANNEL_ID;
+const COUNTING_FAIL_ROLE_ID = process.env.COUNTING_FAIL_ROLE_ID;
+
+let lastCount = 0;
+let lastCounter = null;
 
 client.on(Events.MessageCreate, async (message) => {
+  // Counting game logic
+  if (
+    message.channel.id === COUNTING_CHANNEL_ID &&
+    !message.author.bot
+  ) {
+    const num = parseInt(message.content.trim());
+    if (
+      isNaN(num) ||
+      num !== lastCount + 1 ||
+      message.author.id === lastCounter
+    ) {
+      // Fail: reset, react ❌, assign fail role
+      await message.react('❌');
+      lastCount = 0;
+      lastCounter = null;
+      // Assign fail role for 24h
+      if (COUNTING_FAIL_ROLE_ID) {
+        try {
+          await message.member.roles.add(COUNTING_FAIL_ROLE_ID);
+          setTimeout(async () => {
+            try {
+              await message.member.roles.remove(COUNTING_FAIL_ROLE_ID);
+            } catch {}
+          }, 24 * 60 * 60 * 1000);
+        } catch {}
+      }
+      await message.channel.send('❌ Wrong number or double post! Start again from 1.');
+      return;
+    } else {
+      // Success: react ✅, update state
+      await message.react('✅');
+      lastCount = num;
+      lastCounter = message.author.id;
+      return;
+    }
+  }
   if (message.author.bot) return;
   try {
     const [userXP] = await XP.findOrCreate({
