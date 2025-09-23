@@ -74,13 +74,30 @@ for (const file of commandFiles) {
   }
 }
 
-client.once(Events.ClientReady, () => {
+client.once(Events.ClientReady, async () => {
   console.log(`Logged in as ${client.user.tag}`);
   client.user.setPresence({
     activities: [{ name: 'Nekonia', type: ActivityType.Playing }],
     status: 'online',
   });
   console.log('Set presence: Playing Nekonia');
+
+  // Fetch and cache old /roles messages in the roles selector channel
+  const rolesChannelId = '1418739105751236628';
+  try {
+    const channel = await client.channels.fetch(rolesChannelId);
+    if (channel && channel.isTextBased()) {
+      const messages = await channel.messages.fetch({ limit: 100 });
+      messages.forEach(msg => {
+        if (msg.content.includes('[role-message]')) {
+          channel.messages.fetch(msg.id).catch(() => {});
+        }
+      });
+      console.log('Fetched and cached old /roles messages for reaction roles.');
+    }
+  } catch (e) {
+    console.error('Error fetching messages for reaction role caching:', e);
+  }
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
